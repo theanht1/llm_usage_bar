@@ -3,7 +3,12 @@
 macOS menu bar app showing your Claude Code and Codex rate-limit usage at a glance.
 
 **Menu bar:** `CC 12% · CX 42%` — current session usage for each tool.
+
+![Menu bar](docs/images/menu-bar.png)
+
 **Click it:** full details — session and weekly limits with progress bars, time until reset, per-model buckets, and your plan.
+
+![Details panel](docs/images/details-panel.png)
 
 ## How it gets the data
 
