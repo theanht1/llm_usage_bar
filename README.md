@@ -10,7 +10,9 @@ macOS menu bar app showing your Claude Code and Codex rate-limit usage at a glan
 - **Claude Code** — calls Anthropic's OAuth usage endpoint (the same numbers `/usage` shows) using the credential Claude Code already keeps in your macOS Keychain. Read-only: it never modifies or refreshes the token. If the token expires, just open Claude Code — it refreshes itself.
 - **Codex** — reads the `rate_limits` snapshots the Codex CLI writes into `~/.codex/sessions/`. Fully local. The number is as fresh as your last Codex request; if the snapshot is stale the card says "as of N ago", and expired windows show as 0%.
 
-Data refreshes every 60 seconds.
+Codex data refreshes every 60 seconds; the Claude usage API is polled every 5 minutes (with exponential backoff on 429s).
+
+> **Disclaimer:** This is an unofficial tool, not affiliated with Anthropic or OpenAI. It relies on undocumented endpoints and local file formats that may change or break at any time.
 
 ## Build & run
 
@@ -55,3 +57,7 @@ Codex (plan: plus)
 - `Sources/LLMUsageBar/DetailsView.swift` — click-open panel
 - `scripts/make_icon.swift` — regenerates `Resources/AppIcon.icns` (`swift scripts/make_icon.swift`)
 - `docs/superpowers/specs/2026-07-02-usagebar-design.md` — design doc
+
+## License
+
+[MIT](LICENSE)

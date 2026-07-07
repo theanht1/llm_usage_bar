@@ -1,7 +1,7 @@
 # UsageBar — macOS menu bar app for Claude Code + Codex usage
 
 **Date:** 2026-07-02
-**Status:** Approved by default (user AFK; recommended options chosen). Easy to revise.
+**Status:** Implemented.
 
 ## Purpose
 
