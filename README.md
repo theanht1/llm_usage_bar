@@ -19,7 +19,22 @@ Codex data refreshes every 60 seconds; the Claude usage API is polled every 5 mi
 
 > **Disclaimer:** This is an unofficial tool, not affiliated with Anthropic or OpenAI. It relies on undocumented endpoints and local file formats that may change or break at any time.
 
-## Build & run
+## Install
+
+Download `LLMUsageBar-<version>.zip` from the [latest release](https://github.com/theanht1/llm_usage_bar/releases/latest), unzip it, and move `LLMUsageBar.app` to `/Applications`.
+
+The app is ad-hoc signed (not notarized), so macOS quarantines the download and will refuse to open it at first. Clear the quarantine flag and launch:
+
+```sh
+xattr -d com.apple.quarantine /Applications/LLMUsageBar.app
+open /Applications/LLMUsageBar.app
+```
+
+Alternatively: try to open the app once, then approve it under System Settings → Privacy & Security → "Open Anyway".
+
+**Launch at login:** System Settings → General → Login Items → add LLMUsageBar.
+
+## Build from source
 
 Requires macOS 14+ and the Xcode Command Line Tools (Swift 5.10+).
 
@@ -34,8 +49,6 @@ Install permanently:
 cp -R dist/LLMUsageBar.app /Applications/
 ```
 
-**Launch at login:** System Settings → General → Login Items → add LLMUsageBar.
-
 ## Verify without the UI
 
 ```sh
@@ -46,13 +59,20 @@ prints what the UI would show and exits:
 
 ```
 Claude Code (plan: pro)
+  Running: 2
+    working  /Users/you/projects/app  (pid 8380, tty ttys049)
+    waiting  /Users/you/projects/web  (pid 54116, tty ttys047)
   Session (5h): 12% 1h 14m left
   Weekly (all models): 5% 6d 7h left
   Weekly · Fable: 9% 6d 7h left
 Codex (plan: plus)
+  Running: 1
+    waiting  /Users/you/projects/app  (pid 28055, tty ttys071)
   Session (5h): 42% 2h 3m left
   Weekly: 54% 3d 1h left
 ```
+
+`--focus <pid>` runs the same click-to-focus action the panel rows use and prints each step.
 
 ## Layout
 
@@ -60,6 +80,8 @@ Codex (plan: plus)
 - `Sources/LLMUsageBar/CodexProvider.swift` — session-log parsing
 - `Sources/LLMUsageBar/UsageStore.swift` — 60 s refresh loop, menu bar title
 - `Sources/LLMUsageBar/DetailsView.swift` — click-open panel
+- `Sources/LLMUsageBar/InstanceCounter.swift` — running-session scan (`ps` + `lsof`, working/waiting heuristic)
+- `Sources/LLMUsageBar/SessionFocuser.swift` — click-to-focus (tmux pane / iTerm2 & Terminal.app tab / app activation)
 - `scripts/make_icon.swift` — regenerates `Resources/AppIcon.icns` (`swift scripts/make_icon.swift`)
 - `scripts/release.sh` — builds, tags, and publishes a GitHub release (`scripts/release.sh 1.1.0`; needs a clean tree and the `gh` CLI)
 - `docs/superpowers/specs/2026-07-02-usagebar-design.md` — design doc
