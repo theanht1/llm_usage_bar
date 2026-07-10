@@ -61,6 +61,7 @@ Codex (plan: plus)
 - `Sources/LLMUsageBar/UsageStore.swift` — 60 s refresh loop, menu bar title
 - `Sources/LLMUsageBar/DetailsView.swift` — click-open panel
 - `scripts/make_icon.swift` — regenerates `Resources/AppIcon.icns` (`swift scripts/make_icon.swift`)
+- `scripts/release.sh` — builds, tags, and publishes a GitHub release (`scripts/release.sh 1.1.0`; needs a clean tree and the `gh` CLI)
 - `docs/superpowers/specs/2026-07-02-usagebar-design.md` — design doc
 
 ## License
