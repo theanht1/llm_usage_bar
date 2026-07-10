@@ -24,5 +24,7 @@
     <true/>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSAppleEventsUsageDescription</key>
+    <string>LLMUsageBar selects the terminal tab of the session you click in the details panel.</string>
 </dict>
 </plist>

@@ -5,8 +5,8 @@ struct DetailsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            ToolCard(title: "Claude Code", usage: store.claude)
-            ToolCard(title: "Codex", usage: store.codex)
+            ToolCard(title: "Claude Code", usage: store.claude, instances: store.claudeInstances)
+            ToolCard(title: "Codex", usage: store.codex, instances: store.codexInstances)
             footer
         }
         .padding(14)
@@ -43,6 +43,8 @@ struct DetailsView: View {
 private struct ToolCard: View {
     let title: String
     let usage: ToolUsage
+    let instances: [InstanceCounter.Instance]?
+    @State private var showInstances = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -54,6 +56,25 @@ private struct ToolCard: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 2)
                         .background(.quaternary, in: Capsule())
+                }
+                if let instances {
+                    Button {
+                        withAnimation(.easeInOut(duration: 0.15)) { showInstances.toggle() }
+                    } label: {
+                        HStack(spacing: 3) {
+                            Text("\(instances.filter(\.isWorking).count)/\(instances.count) sessions")
+                            Image(systemName: "chevron.right")
+                                .font(.system(size: 7, weight: .semibold))
+                                .rotationEffect(.degrees(showInstances ? 90 : 0))
+                        }
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(instances.isEmpty)
+                    .help(instances.isEmpty ? "No running sessions"
+                                            : "Show running sessions (working/total)")
                 }
                 Spacer()
                 if let asOf = usage.asOf, Date().timeIntervalSince(asOf) > 120 {
@@ -69,12 +90,70 @@ private struct ToolCard: View {
                     .foregroundStyle(.orange)
             }
 
+            if showInstances, let instances, !instances.isEmpty {
+                VStack(alignment: .leading, spacing: 1) {
+                    ForEach(instances) { instance in
+                        InstanceRow(instance: instance)
+                    }
+                }
+            }
+
             ForEach(usage.allLimits) { limit in
                 LimitRow(limit: limit)
             }
         }
         .padding(10)
         .background(.quinary, in: RoundedRectangle(cornerRadius: 8))
+    }
+}
+
+private struct InstanceRow: View {
+    let instance: InstanceCounter.Instance
+    @State private var hovering = false
+
+    var body: some View {
+        Button {
+            SessionFocuser.focus(instance)
+        } label: {
+            HStack(spacing: 6) {
+                Circle()
+                    .fill(instance.isWorking ? Color.green : Color.secondary.opacity(0.4))
+                    .frame(width: 6, height: 6)
+                Text(shortPath)
+                    .font(.caption)
+                    .lineLimit(1)
+                    .truncationMode(.head)
+                Spacer()
+                if hovering {
+                    Image(systemName: "arrow.up.forward.app")
+                        .font(.caption2)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text(instance.isWorking ? "working" : "waiting")
+                        .font(.caption2)
+                        .foregroundStyle(instance.isWorking ? .green : .secondary)
+                }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .padding(.vertical, 2)
+        .padding(.horizontal, 4)
+        .background(hovering ? AnyShapeStyle(.quaternary) : AnyShapeStyle(.clear),
+                    in: RoundedRectangle(cornerRadius: 4))
+        .onHover { hovering = $0 }
+        .help("\(tildePath) — click to focus its terminal")
+    }
+
+    private var tildePath: String {
+        guard let cwd = instance.cwd else { return "unknown directory" }
+        let home = NSHomeDirectory()
+        return cwd.hasPrefix(home) ? "~" + cwd.dropFirst(home.count) : cwd
+    }
+
+    private var shortPath: String {
+        guard let cwd = instance.cwd else { return "pid \(instance.pid)" }
+        return cwd.split(separator: "/").suffix(2).joined(separator: "/")
     }
 }
 

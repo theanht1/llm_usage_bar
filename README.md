@@ -2,11 +2,11 @@
 
 macOS menu bar app showing your Claude Code and Codex rate-limit usage at a glance.
 
-**Menu bar:** `CC 12% · CX 42%` — current session usage for each tool.
+**Menu bar:** `CC 12% ▸3 · CX 42%` — current session usage for each tool, plus a bold `▸N` count of actively working sessions (hidden when none are working).
 
 ![Menu bar](docs/images/menu-bar.png)
 
-**Click it:** full details — session and weekly limits with progress bars, time until reset, per-model buckets, and your plan.
+**Click it:** full details — session and weekly limits with progress bars, time until reset, per-model buckets, and your plan. Each running instance is listed with its working directory and whether it's working or waiting for input; click a row to jump to its terminal (exact tmux pane / iTerm2 or Terminal.app tab, app-level focus elsewhere).
 
 ![Details panel](docs/images/details-panel.png)
 

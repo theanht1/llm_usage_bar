@@ -5,6 +5,8 @@ import SwiftUI
 final class UsageStore: ObservableObject {
     @Published var claude = ToolUsage()
     @Published var codex = ToolUsage()
+    @Published var claudeInstances: [InstanceCounter.Instance]?
+    @Published var codexInstances: [InstanceCounter.Instance]?
     @Published var lastRefreshed: Date?
     @Published var isRefreshing = false
 
@@ -39,6 +41,9 @@ final class UsageStore: ObservableObject {
 
         Task {
             self.codex = CodexProvider.fetch()
+            let scan = await Task.detached { InstanceCounter.scan() }.value
+            self.claudeInstances = scan?.claude
+            self.codexInstances = scan?.codex
             if fetchClaude {
                 self.applyClaude(await ClaudeProvider.fetch())
             }
@@ -75,12 +80,25 @@ final class UsageStore: ObservableObject {
         }
     }
 
-    var menuTitle: String {
-        "\(shortStatus("CC", claude)) · \(shortStatus("CX", codex))"
+    /// Menu bar label, typographically layered to stay narrow:
+    /// small tool tag, prominent percent, and a petite working-sessions
+    /// count (omitted while nothing is working).
+    var menuLabel: Text {
+        toolLabel("CC", claude, claudeInstances)
+            + Text("\u{2009}·\u{2009}").font(.system(size: 11)).foregroundStyle(.secondary)
+            + toolLabel("CX", codex, codexInstances)
     }
 
-    private func shortStatus(_ prefix: String, _ usage: ToolUsage) -> String {
-        guard let session = usage.session else { return "\(prefix) --" }
-        return "\(prefix) \(Int(session.percent.rounded()))%"
+    private func toolLabel(_ name: String, _ usage: ToolUsage,
+                           _ instances: [InstanceCounter.Instance]?) -> Text {
+        let tag = Text("\(name)\u{2009}").font(.system(size: 9, weight: .semibold))
+            .foregroundStyle(.secondary)
+        let percent = Text(usage.session.map { "\(Int($0.percent.rounded()))%" } ?? "--")
+            .font(.system(size: 12, weight: .medium).monospacedDigit())
+        let working = instances?.lazy.filter(\.isWorking).count ?? 0
+        guard working > 0 else { return tag + percent }
+        let badge = Text("\u{2009}▸\(working)")
+            .font(.system(size: 8, weight: .bold).monospacedDigit())
+        return tag + percent + badge
     }
 }
